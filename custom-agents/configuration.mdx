@@ -1,0 +1,309 @@
+---
+title: 'Agent Configuration'
+description: 'Making your agents configurable in the Open Agent Platform'
+---
+
+# Agent Configuration
+
+To allow your agent to be configurable in Open Agent Platform, you must set custom configuration metadata on your agent's configurable fields. There are currently three types of configurable fields:
+
+1. **General Agent Config:** This consists of general configuration settings like the model name, system prompt, temperature, etc. These are where essentially all of your custom configurable fields should go.
+2. **MCP Tools Config:** This is the config which defines the MCP server and tools to give your agent access to.
+3. **RAG Config:** This is the config which defines the RAG server, and collection name to give your agent access to.
+
+<Note>
+This section assumes you have a basic understanding of configurable fields in LangGraph. If you do not, read the LangGraph documentation ([Python](https://langchain-ai.github.io/langgraph/how-tos/graph-api/#add-runtime-configuration), [TypeScript](https://langchain-ai.github.io/langgraphjs/how-tos/configuration/)) for more information.
+</Note>
+
+## General Agent Config
+
+By default, Open Agent Platform will show *all* fields listed in your configurable object as configurable in the UI. Each field will be configurable via a simple text input. To add more complex configurable field types (e.g boolean, dropdown, slider, etc), you should add a `x_oap_ui_config` object to `metadata` on the field.
+
+Inside this object is where you define the custom UI config for that specific field. The available options are:
+
+```typescript
+export type ConfigurableFieldUIType =
+  | "text"
+  | "textarea"
+  | "number"
+  | "boolean"
+  | "slider"
+  | "select"
+  | "json";
+
+/**
+ * The type interface for options in a select field.
+ */
+export interface ConfigurableFieldOption {
+  label: string;
+  value: string;
+}
+
+/**
+ * The UI configuration for a field in the configurable object.
+ */
+export type ConfigurableFieldUIMetadata = {
+  /**
+   * The label of the field. This will be what is rendered in the UI.
+   */
+  label: string;
+  /**
+   * The default value to render in the UI component.
+   *
+   * @default undefined
+   */
+  default?: unknown;
+  /**
+   * The type of the field.
+   * @default "text"
+   */
+  type?: ConfigurableFieldUIType;
+  /**
+   * The description of the field. This will be rendered below the UI component.
+   */
+  description?: string;
+  /**
+   * The validator function to validate the field value. This is a string that will be parsed as a function.
+   * You can also include a custom error message to show to the user if the validation fails.
+   */
+  validator?: {
+    /**
+     * The validator function to validate the field value.
+     */
+    fn: string;
+    /**
+     * The error message to show to the user if the validation fails. If not provided, a default error message will be shown.
+     */
+    message?: string;
+  };
+  /**
+   * The component specific props. This is only used for certain field types.
+   * "slider" - will contain min, max, step
+   * "select" - will contain options (array of {label: string, value: string})
+   */
+  componentProps?: {
+    [key: string]: unknown;
+  };
+};
+```
+
+Here's an example in TypeScript of how to define this configuration:
+
+```typescript
+import "@langchain/langgraph/zod";
+import { z } from "zod";
+
+export const configurableField = [
+  {
+    name: "model_name",
+    default: "gpt-4o",
+    schema: z.string(),
+    metadata: {
+      description: "The name of the model to use for the agent.",
+      /**
+       * The special UI config field, this specifically is used to signal this field should be rendered with a custom UI component
+       * in OAP.
+       */
+      x_oap_ui_config: {
+        label: "Model Name",
+        type: "select",
+        description: "The name of the model to use for the agent.",
+        componentProps: {
+          options: [
+            {
+              label: "GPT-4o",
+              value: "gpt-4o",
+            },
+            {
+              label: "GPT-4o mini",
+              value: "gpt-4o-mini",
+            },
+            {
+              label: "GPT-3.5 Turbo",
+              value: "gpt-3.5-turbo",
+            },
+          ],
+        },
+      },
+    },
+  },
+  {
+    name: "temperature",
+    default: 0,
+    schema: z.number(),
+    metadata: {
+      description: "The temperature to use for the model.",
+      x_oap_ui_config: {
+        label: "Temperature",
+        type: "slider",
+        description: "The temperature to use for the model.",
+        componentProps: {
+          min: 0,
+          max: 2,
+          step: 0.1,
+        },
+        validator: {
+          fn: "(value) => value >= 0 && value <= 2",
+          message: "Temperature must be between 0 and 2",
+        },
+      },
+    },
+  },
+]
+```
+
+And in Python, this would look like:
+
+```python
+class RagConfig(BaseModel):
+    rag_url: Optional[str] = None
+    collection_name: Optional[str] = None
+
+class McpConfig(BaseModel):
+    mcp_server_url: Optional[str] = None
+    tools_config: Optional[list] = None
+
+class Config(ConfigurableFieldSpec):
+    model_name: str = Field(
+        default="gpt-4o",
+        description="The name of the model to use for the agent.",
+        x_oap_ui_config={
+            "label": "Model Name",
+            "type": "select",
+            "description": "The name of the model to use for the agent.",
+            "componentProps": {
+                "options": [
+                    {
+                        "label": "GPT-4o",
+                        "value": "gpt-4o",
+                    },
+                    {
+                        "label": "GPT-4o mini",
+                        "value": "gpt-4o-mini",
+                    },
+                    {
+                        "label": "GPT-3.5 Turbo",
+                        "value": "gpt-3.5-turbo",
+                    },
+                ],
+            },
+        },
+    )
+    temperature: float = Field(
+        default=0,
+        description="The temperature to use for the model.",
+        x_oap_ui_config={
+            "label": "Temperature",
+            "type": "slider",
+            "description": "The temperature to use for the model.",
+            "componentProps": {
+                "min": 0,
+                "max": 2,
+                "step": 0.1,
+            },
+            "validator": {
+                "fn": "(value) => value >= 0 && value <= 2",
+                "message": "Temperature must be between 0 and 2",
+            },
+        },
+    )
+    system_prompt: str = Field(
+        default="You are a helpful AI assistant.",
+        description="The system prompt to use for the agent.",
+        x_oap_ui_config={
+            "label": "System Prompt",
+            "type": "textarea",
+            "description": "The system prompt to use for the agent.",
+        },
+    )
+```
+
+## MCP Tools Config
+
+To allow an agent to be configurable with MCP tools in Open Agent Platform, you must set a specific `x_oap_config_type` metadata field on the configurable field. This field should be set to `oap_mcp_tools_config`. You only need to set this on a single field in your configurable object. Optionally, you can provide a default value for this field, which will be used when the user is creating a new agent.
+
+Here's an example in TypeScript:
+
+```typescript
+import "@langchain/langgraph/zod";
+import { z } from "zod";
+
+export const configurableField = [
+  // ...other fields
+  {
+    name: "mcp_config",
+    default: {},
+    schema: z.object({
+      mcp_server_url: z.string().optional(),
+      tools_config: z.array(z.any()).optional(),
+    }),
+    metadata: {
+      description: "The MCP tools configuration.",
+      // This special flag is used to signal this field is the MCP Tools Configuration field.
+      x_oap_config_type: "oap_mcp_tools_config",
+    },
+  },
+]
+```
+
+And in Python:
+
+```python
+class Config(ConfigurableFieldSpec):
+    # ...other fields
+    mcp_config: McpConfig = Field(
+        default=McpConfig(),
+        description="The MCP tools configuration.",
+        x_oap_config_type="oap_mcp_tools_config",
+    )
+```
+
+## RAG Config
+
+Configuring RAG is similar to MCP tools. You need to set a specific `x_oap_config_type` metadata field on the configurable field. This field should be set to `oap_rag_config`. You only need to set this on a single field in your configurable object.
+
+Here's an example in TypeScript:
+
+```typescript
+import "@langchain/langgraph/zod";
+import { z } from "zod";
+
+export const configurableField = [
+  // ...other fields
+  {
+    name: "rag_config",
+    default: {},
+    schema: z.object({
+      rag_url: z.string().optional(),
+      collection_name: z.string().optional(),
+    }),
+    metadata: {
+      description: "The RAG configuration.",
+      // This special flag is used to signal this field is the RAG Configuration field.
+      x_oap_config_type: "oap_rag_config",
+    },
+  },
+]
+```
+
+And in Python:
+
+```python
+class Config(ConfigurableFieldSpec):
+    # ...other fields
+    rag_config: RagConfig = Field(
+        default=RagConfig(),
+        description="The RAG configuration.",
+        x_oap_config_type="oap_rag_config",
+    )
+```
+
+## Troubleshooting
+
+If your configurable fields aren't showing up correctly in the OAP UI, check the following:
+
+1. Make sure you've set the correct metadata fields on your configurable fields.
+2. Ensure your configurable field schema matches the expected schema.
+3. For select fields, make sure the options are formatted correctly.
+4. For validator functions, ensure they're valid JavaScript functions.
+5. If it's still not working, confirm your `x_oap_ui_config` metadata has the proper fields set.

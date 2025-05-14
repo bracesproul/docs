@@ -1,97 +1,120 @@
 ---
 title: 'Quickstart'
-description: 'Start building awesome documentation in under 5 minutes'
+description: 'Get started with Open Agent Platform in minutes'
 ---
 
-## Setup your development
+# Quick Setup Guide
 
-Learn how to update your docs locally and deploy them to the public.
+Follow these steps to get your Open Agent Platform up and running quickly.
 
-### Edit and preview
+## 1. Deploying Agents
 
-<AccordionGroup>
-  <Accordion icon="github" title="Clone your docs locally">
-    During the onboarding process, we created a repository on your Github with
-    your docs content. You can find this repository on our
-    [dashboard](https://dashboard.mintlify.com). To clone the repository
-    locally, follow these
-    [instructions](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
-    in your terminal.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Preview changes">
-    Previewing helps you make sure your changes look as intended. We built a
-    command line interface to render these changes locally. 
-    1. Install the
-    [Mintlify CLI](https://www.npmjs.com/package/mintlify) to preview the
-    documentation changes locally with this command: ``` npm i -g mintlify ```
-    2. Run the following command at the root of your documentation (where
-    `docs.json` is): ``` mintlify dev ```
-    <Note>
-      If you’re currently using the legacy ```mint.json``` configuration file, please update the Mintlify CLI:
+The first step in setting up Open Agent Platform is to deploy and configure your agents.
 
+<Steps>
+  <Step title="Clone Pre-built Agents">
+    We've released two pre-built agents specifically for Open Agent Platform:
+    - [Tools Agent](https://github.com/langchain-ai/oap-langgraph-tools-agent)
+    - [Supervisor Agent](https://github.com/langchain-ai/oap-agent-supervisor)
+  </Step>
+  <Step title="Follow Agent Setup Instructions">
+    For each agent repository:
+    1. Clone the repository
+    2. Follow the instructions in the README
+    3. Deploy the agents to LangGraph Platform
+  </Step>
+  <Step title="Configure Environment Variables">
+    After deployment, create a configuration object for each agent:
+    ```json
+    {
+      "id": "The project ID of the deployment",
+      "tenantId": "The tenant ID of your LangSmith account",
+      "deploymentUrl": "The API URL to your deployment",
+      "name": "A custom name for your deployment",
+      "isDefault": "Whether this deployment is the default deployment (only one can be default)",
+      "defaultGraphId": "The graph ID of the default graph (optional, only required if isDefault is true)"
+    }
+    ```
 
-      ```npm i -g mintlify@latest```
-      And run the new upgrade command in your docs repository:
+    You can find your project & tenant IDs with a GET request to the `/info` endpoint on your LangGraph Platform deployment.
+  </Step>
+  <Step title="Set Environment Variables">
+    Combine your agent configurations into a JSON array and set the `NEXT_PUBLIC_DEPLOYMENTS` environment variable:
 
-      ```mintlify upgrade```
-      You should now be using the new ```docs.json``` configuration file. Feel free to delete the ```mint.json``` file from your repository.
-    </Note>
-  </Accordion>
-</AccordionGroup>
+    ```bash
+    NEXT_PUBLIC_DEPLOYMENTS=[{"id":"bf63dc89-1de7-4a65-8336-af9ecda479d6","deploymentUrl":"http://localhost:2024","tenantId":"42d732b3-1324-4226-9fe9-513044dceb58","name":"Local deployment","isDefault":true,"defaultGraphId":"agent"}]
+    ```
+  </Step>
+</Steps>
 
-### Deploy your changes
+## 2. Authentication Setup
 
-<AccordionGroup>
+Open Agent Platform uses Supabase for authentication by default.
 
-<Accordion icon="message-bot" title="Install our Github app">
-  Our Github app automatically deploys your changes to your docs site, so you
-  don't need to manage deployments yourself. You can find the link to install on
-  your [dashboard](https://dashboard.mintlify.com). Once the bot has been
-  successfully installed, there should be a check mark next to the commit hash
-  of the repo.
-</Accordion>
-<Accordion icon="rocket" title="Push your changes">
-  [Commit and push your changes to
-  Git](https://docs.github.com/en/get-started/using-git/pushing-commits-to-a-remote-repository#about-git-push)
-  for your changes to update in your docs site. If you push and don't see that
-  the Github app successfully deployed your changes, you can also manually
-  update your docs through our [dashboard](https://dashboard.mintlify.com).
-</Accordion>
+<Steps>
+  <Step title="Create a Supabase Project">
+    Create a new project in [Supabase](https://supabase.com/).
+  </Step>
+  <Step title="Configure Environment Variables">
+    Set the following environment variables:
+    ```bash
+    NEXT_PUBLIC_SUPABASE_URL="<your supabase url>"
+    NEXT_PUBLIC_SUPABASE_ANON_KEY="<your supabase anon key>"
+    ```
+  </Step>
+  <Step title="Enable Authentication Providers">
+    Enable Google authentication in your Supabase project, or remove the Google authentication UI code from the app.
+  </Step>
+</Steps>
 
-</AccordionGroup>
+## 3. RAG Server Setup
 
-## Update your docs
+<Steps>
+  <Step title="Deploy LangConnect">
+    Follow the instructions in the [LangConnect README](https://github.com/langchain-ai/langconnect) to set up and deploy a LangConnect RAG server.
+  </Step>
+  <Step title="Configure Environment Variables">
+    Set the RAG server URL:
+    ```bash
+    NEXT_PUBLIC_RAG_API_URL="http://localhost:8080"
+    ```
+  </Step>
+</Steps>
 
-Add content directly in your files with MDX syntax and React components. You can use any of our components, or even build your own.
+## 4. MCP Server Setup
 
-<CardGroup>
+<Tip>
+  Open Agent Platform only supports connecting to MCP servers which support Streamable HTTP requests.
+</Tip>
 
-<Card title="Add Content With MDX" icon="file" href="/essentials/markdown">
-  Add content to your docs with MDX syntax.
-</Card>
+<Steps>
+  <Step title="Configure MCP Server URL">
+    Set your MCP server URL (ensure it does not end with `/mcp`):
+    ```bash
+    NEXT_PUBLIC_MCP_SERVER_URL="<your MCP server URL>"
+    ```
+  </Step>
+  <Step title="Configure Authentication (if required)">
+    For authenticated MCP servers:
+    ```bash
+    NEXT_PUBLIC_MCP_AUTH_REQUIRED=true
+    ```
+  </Step>
+</Steps>
 
-<Card
-  title="Add Code Blocks"
-  icon="square-code"
-  href="/essentials/code"
->
-  Add code directly to your docs with syntax highlighting.
-</Card>
+## 5. Run Your Platform
 
-<Card
-  title="Add Images"
-  icon="image"
-  href="/essentials/images"
->
-  Add images to your docs to make them more engaging.
-</Card>
+Start the application with your configured environment variables:
 
-<Card
-  title="Add Custom Components"
-  icon="puzzle-piece"
-  href="/essentials/reusable-snippets"
->
-  Add templates to your docs to make them more reusable.
-</Card>
+```bash
+# Navigate to the web app directory
+cd apps/web
 
-</CardGroup>
+# Install dependencies
+yarn install
+
+# Start the development server
+yarn dev
+```
+
+Your Open Agent Platform should now be running at http://localhost:3000!

@@ -1,71 +1,55 @@
 ---
-title: Introduction
-description: "Welcome to the home of your new documentation"
+title: Open Agent Platform
+description: "A citizen developer platform for building, prototyping, and using AI agents"
 ---
 
-<img
-  className="block dark:hidden"
-  src="/images/hero-light.png"
-  alt="Hero Light"
-/>
-<img
-  className="hidden dark:block"
-  src="/images/hero-dark.png"
-  alt="Hero Dark"
-/>
+# Open Agent Platform
 
-## Setting up
-
-The first step to world-class documentation is setting up your editing environments.
+Open Agent Platform is a citizen developer platform, allowing non-technical users to build, prototype, and use agents. These agents can be connected to a wide range of tools, RAG servers, and even other agents through an Agent Supervisor!
 
 <CardGroup cols={2}>
   <Card
-    title="Edit Your Docs"
-    icon="pen-to-square"
-    href="https://mintlify.com/docs/quickstart"
+    title="Quick Start"
+    icon="bolt"
+    href="/quickstart"
   >
-    Get your docs set up locally for easy development
+    Get your Open Agent Platform running quickly
   </Card>
   <Card
-    title="Preview Changes"
-    icon="image"
-    href="https://mintlify.com/docs/development"
+    title="Agent Setup"
+    icon="robot"
+    href="/setup/agents"
   >
-    Preview your changes before you push to make sure they're perfect
+    Deploy and configure your agents
+  </Card>
+  <Card
+    title="RAG Integration"
+    icon="database"
+    href="/setup/rag-server"
+  >
+    Connect your agents to knowledge bases
+  </Card>
+  <Card
+    title="MCP Server"
+    icon="toolbox"
+    href="/setup/mcp-server"
+  >
+    Extend your agents with powerful tools
   </Card>
 </CardGroup>
 
-## Make it yours
+## What is Open Agent Platform?
 
-Update your docs to your brand and add valuable content for the best user conversion.
+Open Agent Platform provides a modern, web-based interface for creating, managing, and interacting with LangGraph agents. It's designed with simplicity in mind, making it accessible to users without technical expertise, while still offering advanced capabilities for developers.
 
-<CardGroup cols={2}>
-  <Card
-    title="Customize Style"
-    icon="palette"
-    href="https://mintlify.com/docs/settings/global"
-  >
-    Customize your docs to your company's colors and brands
-  </Card>
-  <Card
-    title="Reference APIs"
-    icon="code"
-    href="https://mintlify.com/docs/api-playground/openapi"
-  >
-    Automatically generate endpoints from an OpenAPI spec
-  </Card>
-  <Card
-    title="Add Components"
-    icon="screwdriver-wrench"
-    href="https://mintlify.com/docs/content/components/accordions"
-  >
-    Build interactive features and designs to guide your users
-  </Card>
-  <Card
-    title="Get Inspiration"
-    icon="stars"
-    href="https://mintlify.com/customers"
-  >
-    Check out our showcase of our favorite documentation
-  </Card>
-</CardGroup>
+## Key Features
+
+- **Agent Management**: Build, configure, and interact with agents through an intuitive interface
+- **RAG Integration**: First-class support for Retrieval Augmented Generation with [LangConnect](https://github.com/langchain-ai/langconnect)
+- **MCP Tools**: Connect your agents to external tools through MCP servers
+- **Agent Supervision**: Orchestrate multiple agents working together through an Agent Supervisor
+- **Authentication**: Built-in authentication and access control
+
+## Getting Started
+
+Follow our [quickstart guide](/quickstart) to set up your own instance of Open Agent Platform.
